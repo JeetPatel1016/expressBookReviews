@@ -21,40 +21,62 @@ public_users.post("/register", (req, res) => {
 // Get the book list available in the shop
 public_users.get("/", function (req, res) {
   //Write your code here
-  return res.status(200).json(books);
+  new Promise((resolve, reject) => {
+    resolve(books);
+  })
+    .then((books) => res.status(200).json(books))
+    .catch((err) =>
+      res.status(500).json({ message: "Error occurred while fetching books." })
+    );
 });
 
 // Get book details based on ISBN
 public_users.get("/isbn/:isbn", function (req, res) {
   //Write your code here
   const { isbn } = req.params;
-  if (!books[isbn])
-    return res
-      .status(404)
-      .json({ message: `Book with ISBN ${isbn} cannot be found.` });
-  return res.status(200).json(books[isbn]);
+  const getBookByIsbn = new Promise((resolve, reject) => {
+    const book = books[isbn];
+    if (!book) reject(`Book with ISBN ${ISBN} cannot be found.`);
+    resolve(book);
+  });
+
+  getBookByIsbn
+    .then((book) => res.status(200).json(book))
+    .catch((err) => res.status(404).json({ message: err }));
 });
 
 // Get book details based on author
 public_users.get("/author/:author", function (req, res) {
   //Write your code here
   const { author } = req.params;
-  // An author can write multiple books so array can be returned for result.
-  let booksResult = Object.values(books).filter(
-    (book) => book.author.toLowerCase() === author.toLowerCase()
-  );
+  const getBooksByAuthor = new Promise((resolve, reject) => {
+    let booksResult = Object.values(books).filter(
+      (book) => book.author.toLowerCase() === author.trim().toLowerCase()
+    );
+    if (booksResult.length === 0) reject("No books found.");
+    resolve(booksResult);
+  });
 
-  return res.status(200).json(booksResult);
+  getBooksByAuthor
+    .then((books) => res.status(200).json(books))
+    .catch((err) => res.status(404).json({ message: err }));
 });
 
 // Get all books based on title
 public_users.get("/title/:title", function (req, res) {
   //Write your code here
   const { title } = req.params;
-  let result = Object.values(books).filter(
-    (book) => book.title.toLowerCase() === title.toLowerCase()
-  );
-  return res.status(200).json(result);
+  const getBookByTitle = new Promise((resolve, reject) => {
+    let result = Object.values(books).filter(
+      (book) => book.title.toLowerCase() === title.toLowerCase()
+    );
+    if (result.length === 0) reject("No books found.");
+    resolve(result);
+  });
+
+  getBookByTitle
+    .then((book) => res.status(200).json(book))
+    .catch((err) => res.status(404).json({ message: err }));
 });
 
 //  Get book review
