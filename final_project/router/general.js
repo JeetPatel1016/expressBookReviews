@@ -66,7 +66,6 @@ public_users.get("/review/:isbn", function (req, res) {
       .status(404)
       .json({ message: `Book with ISBN ${isbn} cannot be found.` });
   const result = books[isbn].reviews;
-  console.log({ review: result });
   return res.status(200).json({ review: result });
 });
 
